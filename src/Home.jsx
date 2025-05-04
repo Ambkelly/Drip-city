@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Menu, X, ShoppingBag, Shield, Truck, UserCircle, Star, ChevronRight, Loader2 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 // Mock API service with expanded functionality
 const DripCityAPI = {
@@ -57,13 +58,44 @@ const DripCityAPI = {
   async getStarted(formData) {
     await new Promise(resolve => setTimeout(resolve, 800));
     return { success: true, message: "Your journey with Drip City has begun!" };
+  },
+  async getProducts() {
+    await new Promise(resolve => setTimeout(resolve, 800));
+    return [
+      {
+        id: 1,
+        name: "Premium African Wax Print",
+        price: 4500,
+        vendor: "Nana's Fabrics",
+        rating: 4.8,
+        image: "/wax-print.jpg"
+      },
+      {
+        id: 2,
+        name: "Handwoven Kente Cloth",
+        price: 12500,
+        vendor: "Kente Masters",
+        rating: 5.0,
+        image: "/kente.jpg"
+      },
+      {
+        id: 3,
+        name: "Adire Eleko Fabric",
+        price: 6800,
+        vendor: "Yoruba Traditions",
+        rating: 4.5,
+        image: "/adire.jpg"
+      }
+    ];
   }
 };
 
 export default function DripCityLandingPage() {
+  const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [stats, setStats] = useState(null);
   const [testimonials, setTestimonials] = useState([]);
+  const [products, setProducts] = useState([]);
   const [activeTestimonial, setActiveTestimonial] = useState(0);
   const [email, setEmail] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -116,12 +148,14 @@ export default function DripCityLandingPage() {
   useEffect(() => {
     const loadData = async () => {
       try {
-        const [statsData, testimonialsData] = await Promise.all([
+        const [statsData, testimonialsData, productsData] = await Promise.all([
           DripCityAPI.getStats(),
-          DripCityAPI.getTestimonials()
+          DripCityAPI.getTestimonials(),
+          DripCityAPI.getProducts()
         ]);
         setStats(statsData);
         setTestimonials(testimonialsData);
+        setProducts(productsData);
       } catch (err) {
         console.error("Failed to load data:", err);
         setError("Failed to load data. Please refresh the page.");
@@ -172,6 +206,8 @@ export default function DripCityLandingPage() {
           const response = await DripCityAPI.exploreVendors();
           if (response.success) {
             setActionMessage(response.message);
+            // Navigate to vendors page
+            navigate('/products');
           }
         } catch (err) {
           setError("Action failed. Please try again.");
@@ -308,6 +344,10 @@ export default function DripCityLandingPage() {
     }
   };
 
+  const handleProductClick = (productId) => {
+    navigate(`/products/${productId}`);
+  };
+
   return (
     <div className="min-h-screen bg-black text-white">
       {/* Navbar */}
@@ -410,7 +450,6 @@ export default function DripCityLandingPage() {
           </div>
         )}
       </nav>
-
       {/* Hero Section */}
       <section className="py-16 md:py-24 relative overflow-hidden">
         <div className="absolute inset-0 opacity-10">
