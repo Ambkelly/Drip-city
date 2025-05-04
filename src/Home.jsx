@@ -42,21 +42,21 @@ const DripCityAPI = {
     await new Promise(resolve => setTimeout(resolve, 1000));
     return { success: true };
   },
-  async joinAsVendor() {
+  async joinAsVendor(formData) {
     await new Promise(resolve => setTimeout(resolve, 800));
-    return { success: true, message: "Vendor application started!" };
+    return { success: true, message: "Vendor application submitted successfully!" };
   },
-  async joinAsBuyer() {
+  async joinAsBuyer(formData) {
     await new Promise(resolve => setTimeout(resolve, 800));
-    return { success: true, message: "Buyer registration started!" };
+    return { success: true, message: "Buyer registration completed!" };
   },
   async exploreVendors() {
     await new Promise(resolve => setTimeout(resolve, 800));
     return { success: true, message: "Redirecting to vendors page..." };
   },
-  async getStarted() {
+  async getStarted(formData) {
     await new Promise(resolve => setTimeout(resolve, 800));
-    return { success: true, message: "Starting your journey..." };
+    return { success: true, message: "Your journey with Drip City has begun!" };
   }
 };
 
@@ -71,6 +71,46 @@ export default function DripCityLandingPage() {
   const [error, setError] = useState(null);
   const [actionMessage, setActionMessage] = useState(null);
   const [isLoadingAction, setIsLoadingAction] = useState(false);
+  
+  // Form states
+  const [showVendorForm, setShowVendorForm] = useState(false);
+  const [showBuyerForm, setShowBuyerForm] = useState(false);
+  const [showGetStartedForm, setShowGetStartedForm] = useState(false);
+  const [showMarketplaceForm, setShowMarketplaceForm] = useState(false);
+  
+  // Form data
+  const [vendorForm, setVendorForm] = useState({
+    name: '',
+    businessName: '',
+    email: '',
+    phone: '',
+    businessType: '',
+    yearsInBusiness: '',
+    products: ''
+  });
+  
+  const [buyerForm, setBuyerForm] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    businessType: '',
+    interest: ''
+  });
+  
+  const [getStartedForm, setGetStartedForm] = useState({
+    name: '',
+    email: '',
+    role: 'buyer',
+    goals: ''
+  });
+  
+  const [marketplaceForm, setMarketplaceForm] = useState({
+    name: '',
+    email: '',
+    role: 'vendor',
+    businessName: '',
+    phone: ''
+  });
 
   // Load data on component mount
   useEffect(() => {
@@ -122,38 +162,139 @@ export default function DripCityLandingPage() {
   };
 
   const handleAction = async (action) => {
+    switch(action) {
+      case 'join-marketplace':
+        setShowMarketplaceForm(true);
+        break;
+      case 'explore-vendors':
+        setIsLoadingAction(true);
+        try {
+          const response = await DripCityAPI.exploreVendors();
+          if (response.success) {
+            setActionMessage(response.message);
+          }
+        } catch (err) {
+          setError("Action failed. Please try again.");
+        } finally {
+          setIsLoadingAction(false);
+        }
+        break;
+      case 'get-started':
+        setShowGetStartedForm(true);
+        break;
+      case 'join-vendor':
+        setShowVendorForm(true);
+        break;
+      case 'join-buyer':
+        setShowBuyerForm(true);
+        break;
+      default:
+        break;
+    }
+  };
+
+  const handleVendorSubmit = async (e) => {
+    e.preventDefault();
     setIsLoadingAction(true);
-    setActionMessage(null);
+    setError(null);
+    
+    try {
+      const response = await DripCityAPI.joinAsVendor(vendorForm);
+      if (response.success) {
+        setActionMessage(response.message);
+        setShowVendorForm(false);
+        setVendorForm({
+          name: '',
+          businessName: '',
+          email: '',
+          phone: '',
+          businessType: '',
+          yearsInBusiness: '',
+          products: ''
+        });
+      }
+    } catch (err) {
+      setError("Failed to submit vendor application. Please try again.");
+    } finally {
+      setIsLoadingAction(false);
+    }
+  };
+
+  const handleBuyerSubmit = async (e) => {
+    e.preventDefault();
+    setIsLoadingAction(true);
+    setError(null);
+    
+    try {
+      const response = await DripCityAPI.joinAsBuyer(buyerForm);
+      if (response.success) {
+        setActionMessage(response.message);
+        setShowBuyerForm(false);
+        setBuyerForm({
+          name: '',
+          email: '',
+          phone: '',
+          businessType: '',
+          interest: ''
+        });
+      }
+    } catch (err) {
+      setError("Failed to submit buyer registration. Please try again.");
+    } finally {
+      setIsLoadingAction(false);
+    }
+  };
+
+  const handleGetStartedSubmit = async (e) => {
+    e.preventDefault();
+    setIsLoadingAction(true);
+    setError(null);
+    
+    try {
+      const response = await DripCityAPI.getStarted(getStartedForm);
+      if (response.success) {
+        setActionMessage(response.message);
+        setShowGetStartedForm(false);
+        setGetStartedForm({
+          name: '',
+          email: '',
+          role: 'buyer',
+          goals: ''
+        });
+      }
+    } catch (err) {
+      setError("Failed to start your journey. Please try again.");
+    } finally {
+      setIsLoadingAction(false);
+    }
+  };
+
+  const handleMarketplaceSubmit = async (e) => {
+    e.preventDefault();
+    setIsLoadingAction(true);
     setError(null);
     
     try {
       let response;
-      switch(action) {
-        case 'join-marketplace':
-          response = await DripCityAPI.joinAsVendor();
-          break;
-        case 'explore-vendors':
-          response = await DripCityAPI.exploreVendors();
-          break;
-        case 'get-started':
-          response = await DripCityAPI.getStarted();
-          break;
-        case 'join-vendor':
-          response = await DripCityAPI.joinAsVendor();
-          break;
-        case 'join-buyer':
-          response = await DripCityAPI.joinAsBuyer();
-          break;
-        default:
-          throw new Error("Unknown action");
+      if (marketplaceForm.role === 'vendor') {
+        response = await DripCityAPI.joinAsVendor(marketplaceForm);
+      } else {
+        response = await DripCityAPI.joinAsBuyer(marketplaceForm);
       }
       
       if (response.success) {
         setActionMessage(response.message);
-        // In a real app, you might redirect or show a modal here
+        setShowMarketplaceForm(false);
+        setMarketplaceForm({
+          name: '',
+          email: '',
+          role: 'vendor',
+          businessName: '',
+          phone: ''
+        });
       }
     } catch (err) {
-      setError("Action failed. Please try again.");
+      setError("Failed to join marketplace. Please try again.");
     } finally {
       setIsLoadingAction(false);
     }
@@ -609,6 +750,428 @@ export default function DripCityLandingPage() {
           </div>
         </div>
       </footer>
+
+      {/* Vendor Form Modal */}
+      {showVendorForm && (
+        <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50 p-4">
+          <div className="bg-gray-900 rounded-xl max-w-md w-full p-6 border border-yellow-500">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-xl font-bold text-yellow-500">Vendor Application</h3>
+              <button onClick={() => setShowVendorForm(false)} className="text-gray-400 hover:text-white">
+                <X size={24} />
+              </button>
+            </div>
+            
+            <form onSubmit={handleVendorSubmit} className="space-y-4">
+              <div>
+                <label className="block text-gray-300 mb-1">Full Name</label>
+                <input
+                  type="text"
+                  value={vendorForm.name}
+                  onChange={(e) => setVendorForm({...vendorForm, name: e.target.value})}
+                  className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 text-white"
+                  required
+                />
+              </div>
+              
+              <div>
+                <label className="block text-gray-300 mb-1">Business Name</label>
+                <input
+                  type="text"
+                  value={vendorForm.businessName}
+                  onChange={(e) => setVendorForm({...vendorForm, businessName: e.target.value})}
+                  className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 text-white"
+                  required
+                />
+              </div>
+              
+              <div>
+                <label className="block text-gray-300 mb-1">Email</label>
+                <input
+                  type="email"
+                  value={vendorForm.email}
+                  onChange={(e) => setVendorForm({...vendorForm, email: e.target.value})}
+                  className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 text-white"
+                  required
+                />
+              </div>
+              
+              <div>
+                <label className="block text-gray-300 mb-1">Phone Number</label>
+                <input
+                  type="tel"
+                  value={vendorForm.phone}
+                  onChange={(e) => setVendorForm({...vendorForm, phone: e.target.value})}
+                  className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 text-white"
+                  required
+                />
+              </div>
+              
+              <div>
+                <label className="block text-gray-300 mb-1">Business Type</label>
+                <select
+                  value={vendorForm.businessType}
+                  onChange={(e) => setVendorForm({...vendorForm, businessType: e.target.value})}
+                  className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 text-white"
+                  required
+                >
+                  <option value="">Select business type</option>
+                  <option value="fabric">Fabric Supplier</option>
+                  <option value="accessories">Accessories Supplier</option>
+                  <option value="raw-materials">Raw Materials Supplier</option>
+                  <option value="manufacturer">Manufacturer</option>
+                  <option value="other">Other</option>
+                </select>
+              </div>
+              
+              <div>
+                <label className="block text-gray-300 mb-1">Years in Business</label>
+                <input
+                  type="number"
+                  value={vendorForm.yearsInBusiness}
+                  onChange={(e) => setVendorForm({...vendorForm, yearsInBusiness: e.target.value})}
+                  className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 text-white"
+                  min="0"
+                  required
+                />
+              </div>
+              
+              <div>
+                <label className="block text-gray-300 mb-1">Products/Services Offered</label>
+                <textarea
+                  value={vendorForm.products}
+                  onChange={(e) => setVendorForm({...vendorForm, products: e.target.value})}
+                  className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 text-white"
+                  rows="3"
+                  required
+                ></textarea>
+              </div>
+              
+              <button
+                type="submit"
+                disabled={isLoadingAction}
+                className="w-full px-6 py-3 bg-yellow-500 text-black rounded-lg hover:bg-yellow-600 transition duration-300 font-medium flex items-center justify-center"
+              >
+                {isLoadingAction ? (
+                  <>
+                    <Loader2 className="animate-spin mr-2" size={18} />
+                    Submitting...
+                  </>
+                ) : 'Submit Application'}
+              </button>
+            </form>
+            
+            {error && (
+              <div className="mt-4 text-red-400">
+                {error}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+      
+      {/* Buyer Form Modal */}
+      {showBuyerForm && (
+        <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50 p-4">
+          <div className="bg-gray-900 rounded-xl max-w-md w-full p-6 border border-yellow-500">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-xl font-bold text-yellow-500">Buyer Registration</h3>
+              <button onClick={() => setShowBuyerForm(false)} className="text-gray-400 hover:text-white">
+                <X size={24} />
+              </button>
+            </div>
+            
+            <form onSubmit={handleBuyerSubmit} className="space-y-4">
+              <div>
+                <label className="block text-gray-300 mb-1">Full Name</label>
+                <input
+                  type="text"
+                  value={buyerForm.name}
+                  onChange={(e) => setBuyerForm({...buyerForm, name: e.target.value})}
+                  className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 text-white"
+                  required
+                />
+              </div>
+              
+              <div>
+                <label className="block text-gray-300 mb-1">Email</label>
+                <input
+                  type="email"
+                  value={buyerForm.email}
+                  onChange={(e) => setBuyerForm({...buyerForm, email: e.target.value})}
+                  className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 text-white"
+                  required
+                />
+              </div>
+              
+              <div>
+                <label className="block text-gray-300 mb-1">Phone Number</label>
+                <input
+                  type="tel"
+                  value={buyerForm.phone}
+                  onChange={(e) => setBuyerForm({...buyerForm, phone: e.target.value})}
+                  className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 text-white"
+                  required
+                />
+              </div>
+              
+              <div>
+                <label className="block text-gray-300 mb-1">Business Type</label>
+                <select
+                  value={buyerForm.businessType}
+                  onChange={(e) => setBuyerForm({...buyerForm, businessType: e.target.value})}
+                  className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 text-white"
+                  required
+                >
+                  <option value="">Select business type</option>
+                  <option value="fashion-designer">Fashion Designer</option>
+                  <option value="boutique">Boutique Owner</option>
+                  <option value="tailor">Tailor</option>
+                  <option value="retailer">Retailer</option>
+                  <option value="other">Other</option>
+                </select>
+              </div>
+              
+              <div>
+                <label className="block text-gray-300 mb-1">What are you interested in?</label>
+                <textarea
+                  value={buyerForm.interest}
+                  onChange={(e) => setBuyerForm({...buyerForm, interest: e.target.value})}
+                  className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 text-white"
+                  rows="3"
+                  required
+                  placeholder="Describe the types of materials or products you're looking for"
+                ></textarea>
+              </div>
+              
+              <button
+                type="submit"
+                disabled={isLoadingAction}
+                className="w-full px-6 py-3 bg-yellow-500 text-black rounded-lg hover:bg-yellow-600 transition duration-300 font-medium flex items-center justify-center"
+              >
+                {isLoadingAction ? (
+                  <>
+                    <Loader2 className="animate-spin mr-2" size={18} />
+                    Registering...
+                  </>
+                ) : 'Complete Registration'}
+              </button>
+            </form>
+            
+            {error && (
+              <div className="mt-4 text-red-400">
+                {error}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+      
+      {/* Get Started Form Modal */}
+      {showGetStartedForm && (
+        <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50 p-4">
+          <div className="bg-gray-900 rounded-xl max-w-md w-full p-6 border border-yellow-500">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-xl font-bold text-yellow-500">Get Started with Drip City</h3>
+              <button onClick={() => setShowGetStartedForm(false)} className="text-gray-400 hover:text-white">
+                <X size={24} />
+              </button>
+            </div>
+            
+            <form onSubmit={handleGetStartedSubmit} className="space-y-4">
+              <div>
+                <label className="block text-gray-300 mb-1">Full Name</label>
+                <input
+                  type="text"
+                  value={getStartedForm.name}
+                  onChange={(e) => setGetStartedForm({...getStartedForm, name: e.target.value})}
+                  className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 text-white"
+                  required
+                />
+              </div>
+              
+              <div>
+                <label className="block text-gray-300 mb-1">Email</label>
+                <input
+                  type="email"
+                  value={getStartedForm.email}
+                  onChange={(e) => setGetStartedForm({...getStartedForm, email: e.target.value})}
+                  className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 text-white"
+                  required
+                />
+              </div>
+              
+              <div>
+                <label className="block text-gray-300 mb-1">I want to join as</label>
+                <div className="flex space-x-4">
+                  <label className="flex items-center">
+                    <input
+                      type="radio"
+                      name="role"
+                      value="buyer"
+                      checked={getStartedForm.role === 'buyer'}
+                      onChange={() => setGetStartedForm({...getStartedForm, role: 'buyer'})}
+                      className="mr-2 text-yellow-500"
+                    />
+                    Buyer
+                  </label>
+                  <label className="flex items-center">
+                    <input
+                      type="radio"
+                      name="role"
+                      value="vendor"
+                      checked={getStartedForm.role === 'vendor'}
+                      onChange={() => setGetStartedForm({...getStartedForm, role: 'vendor'})}
+                      className="mr-2 text-yellow-500"
+                    />
+                    Vendor
+                  </label>
+                </div>
+              </div>
+              
+              <div>
+                <label className="block text-gray-300 mb-1">What are your goals with Drip City?</label>
+                <textarea
+                  value={getStartedForm.goals}
+                  onChange={(e) => setGetStartedForm({...getStartedForm, goals: e.target.value})}
+                  className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 text-white"
+                  rows="3"
+                  required
+                  placeholder="Tell us about your business and what you hope to achieve"
+                ></textarea>
+              </div>
+              
+              <button
+                type="submit"
+                disabled={isLoadingAction}
+                className="w-full px-6 py-3 bg-yellow-500 text-black rounded-lg hover:bg-yellow-600 transition duration-300 font-medium flex items-center justify-center"
+              >
+                {isLoadingAction ? (
+                  <>
+                    <Loader2 className="animate-spin mr-2" size={18} />
+                    Starting...
+                  </>
+                ) : 'Begin Your Journey'}
+              </button>
+            </form>
+            
+            {error && (
+              <div className="mt-4 text-red-400">
+                {error}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+      
+      {/* Marketplace Form Modal */}
+      {showMarketplaceForm && (
+        <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50 p-4">
+          <div className="bg-gray-900 rounded-xl max-w-md w-full p-6 border border-yellow-500">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-xl font-bold text-yellow-500">Join the Marketplace</h3>
+              <button onClick={() => setShowMarketplaceForm(false)} className="text-gray-400 hover:text-white">
+                <X size={24} />
+              </button>
+            </div>
+            
+            <form onSubmit={handleMarketplaceSubmit} className="space-y-4">
+              <div>
+                <label className="block text-gray-300 mb-1">Full Name</label>
+                <input
+                  type="text"
+                  value={marketplaceForm.name}
+                  onChange={(e) => setMarketplaceForm({...marketplaceForm, name: e.target.value})}
+                  className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 text-white"
+                  required
+                />
+              </div>
+              
+              <div>
+                <label className="block text-gray-300 mb-1">Email</label>
+                <input
+                  type="email"
+                  value={marketplaceForm.email}
+                  onChange={(e) => setMarketplaceForm({...marketplaceForm, email: e.target.value})}
+                  className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 text-white"
+                  required
+                />
+              </div>
+              
+              <div>
+                <label className="block text-gray-300 mb-1">Phone Number</label>
+                <input
+                  type="tel"
+                  value={marketplaceForm.phone}
+                  onChange={(e) => setMarketplaceForm({...marketplaceForm, phone: e.target.value})}
+                  className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 text-white"
+                  required
+                />
+              </div>
+              
+              <div>
+                <label className="block text-gray-300 mb-1">I want to join as</label>
+                <div className="flex space-x-4">
+                  <label className="flex items-center">
+                    <input
+                      type="radio"
+                      name="role"
+                      value="vendor"
+                      checked={marketplaceForm.role === 'vendor'}
+                      onChange={() => setMarketplaceForm({...marketplaceForm, role: 'vendor'})}
+                      className="mr-2 text-yellow-500"
+                    />
+                    Vendor
+                  </label>
+                  <label className="flex items-center">
+                    <input
+                      type="radio"
+                      name="role"
+                      value="buyer"
+                      checked={marketplaceForm.role === 'buyer'}
+                      onChange={() => setMarketplaceForm({...marketplaceForm, role: 'buyer'})}
+                      className="mr-2 text-yellow-500"
+                    />
+                    Buyer
+                  </label>
+                </div>
+              </div>
+              
+              {marketplaceForm.role === 'vendor' && (
+                <div>
+                  <label className="block text-gray-300 mb-1">Business Name</label>
+                  <input
+                    type="text"
+                    value={marketplaceForm.businessName}
+                    onChange={(e) => setMarketplaceForm({...marketplaceForm, businessName: e.target.value})}
+                    className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 text-white"
+                    required={marketplaceForm.role === 'vendor'}
+                  />
+                </div>
+              )}
+              
+              <button
+                type="submit"
+                disabled={isLoadingAction}
+                className="w-full px-6 py-3 bg-yellow-500 text-black rounded-lg hover:bg-yellow-600 transition duration-300 font-medium flex items-center justify-center"
+              >
+                {isLoadingAction ? (
+                  <>
+                    <Loader2 className="animate-spin mr-2" size={18} />
+                    Processing...
+                  </>
+                ) : 'Continue'}
+              </button>
+            </form>
+            
+            {error && (
+              <div className="mt-4 text-red-400">
+                {error}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
