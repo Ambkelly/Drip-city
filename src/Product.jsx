@@ -11,7 +11,7 @@ const mockProducts = [
     rating: 4.8,
     vendor: "FabricsNG",
     verified: true,
-    image: "https://images.unsplash.com/photo-1556905055-8f358a7a47b2?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+    image: "https://img.freepik.com/free-photo/purple-ornament-indoors-decor-fabric-material_23-2148516022.jpg?uid=R158760462&ga=GA1.1.1304501097.1721386545&semt=ais_hybrid&w=740",
     description: "High-quality African wax print fabric perfect for traditional and modern designs."
   },
   {
@@ -22,7 +22,7 @@ const mockProducts = [
     rating: 4.5,
     vendor: "LeatherCraft",
     verified: true,
-    image: "https://images.unsplash.com/photo-1591348122449-02525d70379b?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+    image: "https://img.freepik.com/free-photo/handbag_1203-8313.jpg?uid=R158760462&ga=GA1.1.1304501097.1721386545&semt=ais_hybrid&w=740",
     description: "Genuine leather straps for handbags and purses. Available in multiple colors."
   },
   {
@@ -33,7 +33,7 @@ const mockProducts = [
     rating: 4.2,
     vendor: "SewingEssentials",
     verified: false,
-    image: "https://images.unsplash.com/photo-1586363104862-3a5e2ab60d99?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+    image: "https://img.freepik.com/free-photo/defocused-blue-buttons_23-2148527901.jpg?uid=R158760462&ga=GA1.1.1304501097.1721386545&semt=ais_hybrid&w=740",
     description: "Pack of 50 assorted buttons for various sewing projects."
   },
   {
@@ -44,7 +44,7 @@ const mockProducts = [
     rating: 4.7,
     vendor: "ThreadMaster",
     verified: true,
-    image: "https://images.unsplash.com/photo-1566121933407-3c7ccdd26763?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+    image: "https://img.freepik.com/free-photo/group-yellow-thread-reals_23-2148212637.jpg?uid=R158760462&ga=GA1.1.1304501097.1721386545&semt=ais_hybrid&w=740",
     description: "High-quality cotton thread set with 20 different colors."
   },
   {
@@ -66,7 +66,7 @@ const mockProducts = [
     rating: 4.6,
     vendor: "LuxuryFabrics",
     verified: true,
-    image: "https://images.unsplash.com/photo-1563170351-be82bc888aa4?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+    image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQccoYW52DqyTpntoUkY13NINyRmY6flglP0w&s",
     description: "Premium suede fabric perfect for jackets, bags, and upholstery."
   }
 ];
